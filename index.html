@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Чат с ИИ</title>
+    <style>
+        body {
+            background-color: #2b2b2b;
+            color: #e0e0e0;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        .chat-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #3a3a3a;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+        #chat-box {
+            height: 300px;
+            overflow-y: auto;
+            background-color: #4a4a4a;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .message {
+            margin: 10px 0;
+        }
+        .user-message { color: #1e90ff; }
+        .ai-message { color: #32cd32; }
+        input[type="text"], input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            background-color: #5a5a5a;
+            border: none;
+            border-radius: 5px;
+            color: #e0e0e0;
+        }
+        button {
+            background-color: #1e90ff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #4682b4;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <h2>Чат с ИИ</h2>
+        <div id="chat-box"></div>
+        <input type="text" id="user-input" placeholder="Напишите сообщение...">
+        <input type="file" id="image-upload" accept="image/*">
+        <button onclick="sendMessage()">Отправить</button>
+    </div>
+
+    <script>
+        const chatBox = document.getElementById('chat-box');
+        const userInput = document.getElementById('user-input');
+        const imageUpload = document.getElementById('image-upload');
+
+        function addMessage(text, isUser = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message');
+            messageDiv.classList.add(isUser ? 'user-message' : 'ai-message');
+            messageDiv.textContent = text;
+            chatBox.appendChild(messageDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        async function sendMessage() {
+            const text = userInput.value.trim();
+            const file = imageUpload.files[0];
+
+            if (!text && !file) return;
+
+            if (text) {
+                addMessage('Вы: ' + text, true);
+                userInput.value = '';
+            }
+            if (file) {
+                addMessage('Вы загрузили изображение: ' + file.name, true);
+                imageUpload.value = '';
+            }
+
+            // Отправка запроса к серверу
+            const response = await fetch('YOUR_BACKEND_URL_HERE/ask', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: text || 'Опиши это изображение', image: file ? file.name : null })
+            });
+            const data = await response.json();
+            addMessage('ИИ: ' + data.answer);
+        }
+
+        userInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+    </script>
+</body>
+</html>
